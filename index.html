@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guess-w-Us</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <div class="mode-selector">
+  <button id="single-player-btn" class="mode-btn">🎯</button>
+  <span class="tooltip">Play Wordle</span>
+  
+  <button id="multiplayer-btn" class="mode-btn">🤝</button>
+  <span class="tooltip">Play with Friend</span>
+</div>
+
+  <h1 class="title">Guess-w-Us</h1>
+
+  <div class="top-right-buttons">
+
+    <div class="tooltip-container">
+      <button id="hint-btn" class="circle-btn">💡</button>
+      <span class="tooltip-text">Get a hint</span>
+    </div>
+    <div class="tooltip-container">
+      <button id="help-btn" class="circle-btn">?</button>
+      <span class="tooltip-text">How to play</span>
+    </div>
+  </div>
+ <div id="instructions-modal" class="modal">
+  <div class="modal-content">
+    <span id="close-modal" class="close">&times;</span>
+    <h2>How to Play</h2>
+    <p>Guess the <strong>WORDLE</strong> in 6 tries.</p>
+    <p>Each guess must be a valid 5-letter word. Hit the enter button to submit.</p>
+    <p>After each guess, the color of the tiles will change to show how close your guess was to the word.</p>
+
+    <ul>
+      <li>🟢 <strong>Green</strong>: Letter is in the word and in the correct spot.</li>
+      <li>🟡 <strong>Yellow</strong>: Letter is in the word but in the wrong spot.</li>
+      <li>⚫  <strong>Gray</strong>: Letter is not in the word in any spot.</li>
+    </ul>
+
+    <button id="understoodBtn">Got it</button>
+  </div>
+</div>
+
+
+  <div class="guess-grid">
+    <!-- Repeat this for 6 rows -->
+    <div class="guess-row">
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+    </div>
+    <div class="guess-row">
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+    </div>
+    <div class="guess-row">
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+    </div>
+    <div class="guess-row">
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+    </div>
+    <div class="guess-row">
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+    </div>
+    <div class="guess-row">
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+    </div>
+    <!-- Add more rows as needed -->
+  </div>
+
+  <div class="keyboard">
+    <div class="row">
+      <button class="key gray">Q</button><button class="key gray">W</button><button class="key gray">E</button>
+      <button class="key gray">R</button><button class="key gray">T</button><button class="key gray">Y</button>
+      <button class="key gray">U</button><button class="key gray">I</button><button class="key gray">O</button>
+      <button class="key gray">P</button>
+    </div>
+    <div class="row">
+      <button class="key gray">A</button><button class="key gray">S</button><button class="key gray">D</button>
+      <button class="key gray">F</button><button class="key gray">G</button><button class="key gray">H</button>
+      <button class="key gray">J</button><button class="key gray">K</button><button class="key gray">L</button>
+    </div>
+    <div class="row">
+      <button class="key enter">ENTER</button><button class="key gray">Z</button><button class="key gray">X</button>
+      <button class="key gray">C</button><button class="key gray">V</button><button class="key gray">B</button>
+      <button class="key gray">N</button><button class="key gray">M</button><button class="key backspace"></button>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+  <script src="words.js"></script>
+  <script src="gameLogic.js"></script>
+  
+
+</body>
+</html>
