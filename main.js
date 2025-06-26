@@ -399,6 +399,42 @@ function showResultModal(word, didWin = true) {
 
 
 function startNewGame() {
-  localStorage.setItem("skipInstructions", "true");
-  location.reload(); // Reloads page without modal
+  // Hide the win modal
+  const winModal = document.getElementById('win-modal');
+  winModal.style.display = 'none';
+
+  // Reset game state
+  currentRow = 0;
+  currentCol = 0;
+  isGameReady = false;
+  targetWord = "";
+
+  // Clear the guess grid
+  guessGrid.forEach(row => {
+    Array.from(row.children).forEach(cell => {
+      cell.textContent = "";
+      cell.style.backgroundColor = "";
+      cell.classList.remove("flip");
+    });
+  });
+
+  // Reset the keyboard
+  keys.forEach(key => {
+    key.style.backgroundColor = "";
+    key.style.color = "";
+  });
+
+  // Clear hint text
+  document.getElementById('hint-text').textContent = "";
+
+  // Hide share link and input
+  document.getElementById('share-link-container').style.display = 'none';
+
+  // Clear the secret word input if any
+  inputField.value = "";
+
+  // Show mode selection again
+  document.querySelector('.mode-selector').style.display = "flex";
+  setupScreen.style.display = "none"; // ensure setup form is hidden
 }
+
