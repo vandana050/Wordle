@@ -1,4 +1,4 @@
-let targetWord = getRandomWord();
+//let targetWord = getRandomWord();
 console.log("Target word:", targetWord); // For debugging
 
 function checkGuess(guess) {
