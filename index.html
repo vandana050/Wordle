@@ -1,25 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Guess-w-Us</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  
-  <div class="mode-selector">
-  <button id="single-player-btn" class="mode-btn">🎯</button>
-  <span class="tooltip">Play Wordle</span>
-  
-  <button id="multiplayer-btn" class="mode-btn">🤝</button>
-  <span class="tooltip">Play with Friend</span>
-</div>
+<div id="toast" class="toast">Copied!</div>
 
-<div id="setup-screen" style="display: none; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px;">
-  <h2>Enter a secret 5-letter word</h2>
-  <input id="secret-word-input" type="text" maxlength="5" placeholder="e.g., apple" style="text-transform: lowercase; padding: 8px; font-size: 16px;">
-  <button id="start-game-btn" style="padding: 10px 20px; font-weight: bold;">Start Game</button>
-</div>
+<body>
+
+  <div class="mode-selector">
+    <button id="single-player-btn" class="mode-btn">🎯</button>
+    <span class="tooltip">Play Wordle</span>
+
+    <button id="multiplayer-btn" class="mode-btn">🤝</button>
+    <span class="tooltip">Play with Friend</span>
+  </div>
+
+  <div id="setup-screen"
+    style="display: none; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px;">
+
+    <h2>Enter a secret 5-letter word</h2>
+
+    <input id="secret-word-input" type="text" maxlength="5" placeholder="e.g., apple"
+      style="text-transform: lowercase; padding: 8px; font-size: 16px;">
+
+    <!-- Start + Copy Button Side-by-side -->
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button id="start-game-btn" style="padding: 10px 20px; font-weight: bold;">Start Game</button>
+
+
+    </div>
+  </div>
+
+  <!-- Shareable link & copy button (initially hidden) -->
+  <div id="share-link-container"
+    style="display: none; flex-direction: column; align-items: center; gap: 6px; margin-top: 20px;">
+    <input id="share-link" type="text" readonly
+      style="padding: 8px; width: 300px; text-align: center; font-size: 16px; border-radius: 8px; border: 1px solid #9e1d1d;">
+
+
+  </div>
+
+
+
 
 
   <h1 class="title">Guess-w-Us</h1>
@@ -28,65 +53,84 @@
 
 
   <div class="top-right-buttons">
-
     <div class="tooltip-container">
       <button id="hint-btn" class="circle-btn">💡</button>
       <span class="tooltip-text">Get a hint</span>
     </div>
+    <p id="hint-text" style="margin-top: 10px; color: #ccc; font-style: italic;"></p>
+
+    <div class="tooltip-container">
+      <button id="copy-link-btn" class="circle-btn">🔗</button>
+      <span class="tooltip-text">Copy game link</span>
+    </div>
+
+
     <div class="tooltip-container">
       <button id="help-btn" class="circle-btn">?</button>
       <span class="tooltip-text">How to play</span>
     </div>
   </div>
- <div id="instructions-modal" class="modal">
-  <div class="modal-content">
-    <span id="close-modal" class="close">&times;</span>
-    <h2>How to Play</h2>
-    <p>Guess the <strong>WORDLE</strong> in 6 tries.</p>
-    <p>Each guess must be a valid 5-letter word. Hit the enter button to submit.</p>
-    <p>After each guess, the color of the tiles will change to show how close your guess was to the word.</p>
+  <div id="instructions-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal" class="close">&times;</span>
+      <h2>How to Play</h2>
+      <p>Guess the <strong>WORDLE</strong> in 6 tries.</p>
+      <p>Each guess must be a valid 5-letter word. Hit the enter button to submit.</p>
+      <p>After each guess, the color of the tiles will change to show how close your guess was to the word.</p>
 
-    <ul>
-      <li>🟢 <strong>Green</strong>: Letter is in the word and in the correct spot.</li>
-      <li>🟡 <strong>Yellow</strong>: Letter is in the word but in the wrong spot.</li>
-      <li>⚫  <strong>Gray</strong>: Letter is not in the word in any spot.</li>
-    </ul>
+      <ul>
+        <li>🟢 <strong>Green</strong>: Letter is in the word and in the correct spot.</li>
+        <li>🟡 <strong>Yellow</strong>: Letter is in the word but in the wrong spot.</li>
+        <li>⚫ <strong>Gray</strong>: Letter is not in the word in any spot.</li>
+      </ul>
 
-    <button id="understoodBtn">Got it</button>
+      <button id="understoodBtn"> Got it </button>
+    </div>
   </div>
-</div>
 
 
   <div class="guess-grid">
     <!-- Repeat this for 6 rows -->
     <div class="guess-row">
-      <div class="guess-cell"></div><div class="guess-cell"></div>
-      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
       <div class="guess-cell"></div>
     </div>
     <div class="guess-row">
-      <div class="guess-cell"></div><div class="guess-cell"></div>
-      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
       <div class="guess-cell"></div>
     </div>
     <div class="guess-row">
-      <div class="guess-cell"></div><div class="guess-cell"></div>
-      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
       <div class="guess-cell"></div>
     </div>
     <div class="guess-row">
-      <div class="guess-cell"></div><div class="guess-cell"></div>
-      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
       <div class="guess-cell"></div>
     </div>
     <div class="guess-row">
-      <div class="guess-cell"></div><div class="guess-cell"></div>
-      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
       <div class="guess-cell"></div>
     </div>
     <div class="guess-row">
-      <div class="guess-cell"></div><div class="guess-cell"></div>
-      <div class="guess-cell"></div><div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
+      <div class="guess-cell"></div>
       <div class="guess-cell"></div>
     </div>
     <!-- Add more rows as needed -->
@@ -114,7 +158,42 @@
   <script src="main.js"></script>
   <script src="words.js"></script>
   <script src="gameLogic.js"></script>
-  
+
+
+  <div id="win-modal" style="display: none; position: fixed; top: 0; left: 0; 
+  width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.8); 
+  display: none; align-items: center; justify-content: center; z-index: 9999;">
+
+    <div
+      style="background-color: #010101; padding: 30px 40px; border-radius: 12px; max-width: 400px; text-align: center;">
+      <h2 style="color: green;">🎉 You Won!</h2>
+      <p><strong>Correct Word:</strong>
+        <span id="win-word"></span>
+      </p> <!-- Only this one -->
+      <p><strong>Meaning:</strong></p>
+      <p id="win-meaning" style="font-style: italic; color: #efecec;"></p>
+      <button onclick="startNewGame()"
+        style="margin-top: 20px; padding: 8px 20px; border: none; background-color: #4CAF50; color: white; border-radius: 5px;">
+        🔁 New Game
+      </button>
+
+    </div>
+  </div>
+  <div id="hint-modal" style="display: none; position: fixed; top: 0; left: 0; 
+  width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.8); 
+  align-items: center; justify-content: center; z-index: 9999;">
+
+    <div style="background-color: #111; padding: 25px 35px; border-radius: 12px; max-width: 400px; text-align: center;">
+      <h2 style="color: #ffc107;">💡 Hint</h2>
+      <p id="hint-modal-text" style="color: #ccc; font-style: italic;">Fetching hint...</p>
+      <button id="close-hint-modal"
+        style="margin-top: 20px; padding: 8px 20px; border: none; background-color: #ff9800; color: white; border-radius: 5px;">
+        Close
+      </button>
+    </div>
+  </div>
+
 
 </body>
+
 </html>
