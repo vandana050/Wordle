@@ -1,8 +1,10 @@
 // ========== INSTRUCTIONS MODAL ==========
 // ========== AUTH CHECK ==========
+// ========== AUTH CHECK ==========
 const token = localStorage.getItem("token");
+const isGuest = localStorage.getItem("guest");
 
-if (!token) {
+if (!token && !isGuest) {
   window.location.href = "auth.html";
 }
 
@@ -455,5 +457,6 @@ function logout() {
   window.location.href = "auth.html";
 }
   
+
 
 
