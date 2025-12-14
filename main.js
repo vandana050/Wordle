@@ -1,4 +1,5 @@
-// ========== AUTH CHECK ==========
+
+
 const token = localStorage.getItem("token");
 const isGuest = localStorage.getItem("guest");
 
@@ -6,12 +7,9 @@ if (!token && !isGuest) {
   window.location.href = "auth.html";
 }
 
-// ========== INSTRUCTIONS MODAL ==========
+
+
 document.addEventListener('DOMContentLoaded', () => {
-
-  // Load stats only for logged-in users
-  loadStats();
-
   const modal = document.querySelector("#instructions-modal");
   const closeBtn = document.querySelector("#close-modal");
   const understoodBtn = document.querySelector("#understoodBtn");
@@ -20,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyBtn = document.getElementById('copy-link-btn');
   const shareLinkInput = document.getElementById('share-link');
 
+  // ✅ Show modal only if user hasn't skipped it
   if (!localStorage.getItem("skipInstructions")) {
     modal.style.display = "flex";
   }
@@ -35,14 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   helpBtn.addEventListener("click", () => {
-    localStorage.removeItem("skipInstructions");
+    localStorage.removeItem("skipInstructions"); // so help opens again in the future
     modal.style.display = "flex";
   });
 
-  // Multiplayer via URL
+  // Multiplayer shared word via URL
   const urlParams = new URLSearchParams(window.location.search);
   const encodedWord = urlParams.get("code");
-  const wordFromUrl = encodedWord ? atob(encodedWord) : null;
+const wordFromUrl = encodedWord ? atob(encodedWord) : null;
+
 
   if (wordFromUrl && /^[a-z]{5}$/.test(wordFromUrl)) {
     targetWord = wordFromUrl.toLowerCase();
@@ -54,67 +54,62 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.keyboard').style.display = 'flex';
   }
 
+  // Copy link functionality
   copyBtn.addEventListener('click', () => {
     const link = shareLinkInput.value;
+
     if (!link) return showToast("No link to copy!");
+
     navigator.clipboard.writeText(link)
-      .then(() => showToast("Copied!"));
+      .then(() => showToast("Copied!"))
+      .catch(() => showToast("Failed to copy!"));
   });
 
-  // Hint logic
+  // ✅ HINT button logic
+  // ✅ HINT button logic with toggle
   const hintBtn = document.getElementById('hint-btn');
   const hintText = document.getElementById('hint-text');
-  let hintVisible = false;
 
-  hintBtn.addEventListener('click', () => {
-    if (hintVisible) {
-      hintText.textContent = "";
-      hintVisible = false;
-      return;
-    }
+  if (hintBtn && hintText) {
+    let hintVisible = false;
 
-    if (!targetWord) {
-      hintText.textContent = "Start the game first to get a hint.";
+    hintBtn.addEventListener('click', () => {
+      if (hintVisible) {
+        // Hide the hint
+        hintText.textContent = "";
+        hintVisible = false;
+        return;
+      }
+
+      if (!targetWord || targetWord.length !== 5) {
+        hintText.textContent = "Start the game first to get a hint.";
+        hintVisible = true;  // so clicking again hides this message
+        return;
+      }
+
+      // Show loading text while fetching
+      hintText.textContent = "Fetching hint...";
       hintVisible = true;
-      return;
-    }
 
-    hintText.textContent = "Fetching hint...";
-    hintVisible = true;
+      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${targetWord}`)
+        .then(res => res.json())
+        .then(data => {
+          const definitions = data[0]?.meanings[0]?.definitions;
+          const fullHint = definitions?.[0]?.definition || "No hint available.";
 
-    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${targetWord}`)
-      .then(res => res.json())
-      .then(data => {
-        const def = data[0]?.meanings[0]?.definitions[0]?.definition;
-        hintText.textContent = def ? `Hint: ${def.slice(0, 100)}...` : "No hint available.";
-      })
-      .catch(() => hintText.textContent = "Couldn't fetch hint.");
-  });
+          const hint = fullHint.length > 100 ? fullHint.slice(0, 100) + "..." : fullHint;
+
+          hintText.textContent = `Hint: ${hint}`;
+        })
+        .catch(err => {
+          hintText.textContent = "Sorry, couldn't fetch a hint.";
+        });
+    });
+  }
+
 });
 
-// ========== LOAD STATS ==========
-async function loadStats() {
-  if (!token || isGuest) return;
 
-  try {
-    const res = await fetch("http://localhost:5000/api/game/stats", {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    if (!res.ok) return;
-
-    const data = await res.json();
-    document.getElementById("stats-panel").style.display = "block";
-    document.getElementById("games").innerText = data.games_played;
-    document.getElementById("wins").innerText = data.wins;
-    document.getElementById("losses").innerText = data.losses;
-
-    const percent = data.games_played === 0
-      ? 0
-      : Math.round((data.wins / data.games_played) * 100);
-
-    document.getElementById("winPercent").innerText = percent;
-  } catch {}
-}
 
 // ========== GLOBAL GAME VARIABLES ==========
 let currentRow = 0;
@@ -137,7 +132,7 @@ const copyBtn = document.getElementById('copy-link-btn');
 const shareLinkInput = document.getElementById('share-link');
 
 singleBtn.addEventListener('click', () => {
-  targetWord = getRandomWord();
+  targetWord = getRandomWord(); // From words.js
   isGameReady = true;
   document.querySelector('.mode-selector').style.display = "none";
   document.querySelector('.guess-grid').style.display = 'grid';
@@ -154,73 +149,130 @@ startBtn.addEventListener('click', (e) => {
   e.preventDefault();
   const word = inputField.value.trim().toLowerCase();
 
-  if (/^[a-z]{5}$/.test(word)) {
+  if (word.length === 5 && /^[a-z]{5}$/.test(word)) {
     targetWord = word;
     isGameReady = true;
 
+    // Hide mode selector and setup screen, show the game grid and keyboard
     document.querySelector('.mode-selector').style.display = "none";
     setupScreen.style.display = "none";
     document.querySelector('.guess-grid').style.display = 'grid';
     document.querySelector('.keyboard').style.display = 'flex';
 
-    const encoded = btoa(word);
-    shareLinkInput.value = `${location.origin}${location.pathname}?code=${encoded}`;
+    // Build shareable URL with the secret word in the query string
+    const encoded = btoa(word); // Encode the word
+    const shareUrl = `${window.location.origin}${window.location.pathname}?code=${encoded}`;
+
+
+    // Show and populate the share link input
+
+    document.getElementById('share-link-container').style.display = 'flex';
+
+    // Show and populate the share link input (but keep it hidden)
+    shareLinkInput.value = shareUrl;
+    shareLinkInput.style.display = "none"; // 👈 Hide the input
+
+    // Show the container that includes the copy button
     document.getElementById('share-link-container').style.display = "flex";
+
+    // Show the copy button itself
+    copyBtn.style.display = "inline-block";
+
+
+    // Clear input and blur
     inputField.value = "";
+    inputField.blur();
   } else {
     showToast("Please enter a valid 5-letter word.");
   }
 });
 
-// ========== TOAST ==========
+
+// ========== TOAST FUNCTION ==========
 function showToast(message) {
   const toast = document.createElement('div');
   toast.textContent = message;
-  toast.style.cssText =
-    "position:fixed;bottom:30px;right:30px;background:#333;color:#fff;padding:10px 20px;border-radius:20px;z-index:9999;";
+  toast.style.position = 'fixed';
+  toast.style.bottom = '30px';
+  toast.style.right = '30px';
+  toast.style.backgroundColor = '#333';
+  toast.style.color = '#fff';
+  toast.style.padding = '10px 20px';
+  toast.style.borderRadius = '20px';
+  toast.style.fontSize = '14px';
+  toast.style.zIndex = '9999';
+  toast.style.opacity = '0';
+  toast.style.transition = 'opacity 0.3s ease';
+
   document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 1500);
+  requestAnimationFrame(() => toast.style.opacity = '1');
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 1500);
 }
 
 // ========== INPUT ==========
 function addLetter(letter) {
-  if (!isGameReady || currentCol >= maxCols) return;
-  guessGrid[currentRow].children[currentCol++].textContent = letter.toUpperCase();
+  if (!isGameReady) return;
+  if (currentCol < maxCols) {
+    const cell = guessGrid[currentRow].children[currentCol];
+    cell.textContent = letter.toUpperCase();
+    currentCol++;
+  }
 }
 
 function removeLetter() {
-  if (!isGameReady || currentCol === 0) return;
-  guessGrid[currentRow].children[--currentCol].textContent = '';
+  if (!isGameReady) return;
+  if (currentCol > 0) {
+    currentCol--;
+    const cell = guessGrid[currentRow].children[currentCol];
+    cell.textContent = '';
+  }
 }
 
-// ========== KEYBOARD COLOR ==========
+// ========== KEYBOARD COLOR LOGIC ==========
 function updateKeyboard(letter, status) {
-  const key = [...keys].find(k => k.textContent === letter.toUpperCase());
-  if (!key) return;
+  const keyButton = [...keys].find(key => key.textContent === letter.toUpperCase());
+  if (!keyButton) return;
 
-  if (status === "correct") key.style.backgroundColor = "#538d4e";
-  else if (status === "present") key.style.backgroundColor = "#b59f3b";
-  else key.style.backgroundColor = "#3a3a3c";
+  const currentColor = keyButton.style.backgroundColor;
+
+  if (status === "correct") {
+    keyButton.style.backgroundColor = "#538d4e";
+    keyButton.style.color = "white";
+  } else if (status === "present" && currentColor !== "rgb(83, 141, 78)") {
+    keyButton.style.backgroundColor = "#b59f3b";
+    keyButton.style.color = "white";
+  } else if (status === "absent" &&
+    currentColor !== "rgb(83, 141, 78)" &&
+    currentColor !== "rgb(181, 159, 59)") {
+    keyButton.style.backgroundColor = "#3a3a3c";
+    keyButton.style.color = "white";
+  }
 }
 
 // ========== CHECK GUESS ==========
 function checkGuess(guess) {
-  const result = Array(5).fill("absent");
-  const used = Array(5).fill(false);
+  guess = guess.toLowerCase();
+  const target = targetWord;
+  const result = Array(maxCols).fill("absent");
+  const targetUsed = Array(maxCols).fill(false);
 
-  for (let i = 0; i < 5; i++) {
-    if (guess[i] === targetWord[i]) {
+  for (let i = 0; i < maxCols; i++) {
+    if (guess[i] === target[i]) {
       result[i] = "correct";
-      used[i] = true;
+      targetUsed[i] = true;
     }
   }
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < maxCols; i++) {
     if (result[i] === "correct") continue;
-    for (let j = 0; j < 5; j++) {
-      if (!used[j] && guess[i] === targetWord[j]) {
+    for (let j = 0; j < maxCols; j++) {
+      if (!targetUsed[j] && guess[i] === target[j]) {
         result[i] = "present";
-        used[j] = true;
+        targetUsed[j] = true;
         break;
       }
     }
@@ -228,73 +280,180 @@ function checkGuess(guess) {
   return result;
 }
 
+async function isRealWord(word) {
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    return response.ok;
+  } catch (error) {
+    console.error("Error checking word validity:", error);
+    return false;
+  }
+}
+
 // ========== SUBMIT GUESS ==========
+
+
+// Modify submitGuess to be async
 async function submitGuess() {
-  if (!isGameReady || currentCol !== 5) return;
+  if (!isGameReady) return;
+  if (currentCol !== maxCols) return;
 
   let guess = "";
-  [...guessGrid[currentRow].children].forEach(c => guess += c.textContent.toLowerCase());
+  const row = guessGrid[currentRow];
+  for (let i = 0; i < maxCols; i++) {
+    guess += row.children[i].textContent.toLowerCase();
+  }
 
-  const valid = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${guess}`)
-    .then(res => res.ok);
-
-  if (!valid) return showToast("Not a real word!");
-
-  const result = checkGuess(guess);
-  result.forEach((s, i) => updateKeyboard(guess[i], s));
-
-  if (guess === targetWord) {
-    showResultModal(targetWord, true);
+  // ✅ Check if it's a real word using the API
+  const valid = await isRealWord(guess);
+  if (!valid) {
+    showToast("Not a real word!");
     return;
   }
 
-  currentRow++;
-  currentCol = 0;
+  const result = checkGuess(guess);
 
-  if (currentRow === maxRows) {
-    showResultModal(targetWord, false);
-  }
+  result.forEach((status, i) => {
+    const cell = row.children[i];
+    const letter = guess[i].toUpperCase();
+
+    setTimeout(() => {
+      cell.classList.add("flip");
+
+      setTimeout(() => {
+        if (status === "correct") {
+          cell.style.backgroundColor = "#538d4e";
+        } else if (status === "present") {
+          cell.style.backgroundColor = "#b59f3b";
+        } else {
+          cell.style.backgroundColor = "#3a3a3c";
+        }
+
+        updateKeyboard(letter, status);
+      }, 300);
+    }, i * 300);
+  });
+
+  setTimeout(() => {
+    if (guess.toLowerCase() === targetWord && guess.trim().length === 5) {
+      showResultModal(targetWord, true); // Win
+      return;
+    }
+
+
+    currentRow++;
+    currentCol = 0;
+
+    if (currentRow === maxRows) {
+      showResultModal(targetWord, false); // Loss
+    }
+
+  }, maxCols * 300 + 300);
 }
+
 
 // ========== KEYBOARD EVENTS ==========
 keys.forEach(key => {
   key.addEventListener('click', () => {
-    if (key.classList.contains('backspace')) removeLetter();
-    else if (key.classList.contains('enter')) submitGuess();
-    else addLetter(key.textContent);
+    const letter = key.textContent;
+
+    if (key.classList.contains('backspace')) {
+      removeLetter();
+    } else if (key.classList.contains('enter')) {
+      submitGuess();
+    } else {
+      addLetter(letter);
+    }
   });
 });
 
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', (event) => {
   if (document.activeElement === inputField) return;
 
-  if (e.key === "Backspace") removeLetter();
-  else if (e.key === "Enter") submitGuess();
-  else if (/^[a-zA-Z]$/.test(e.key)) addLetter(e.key);
+  const key = event.key;
+
+  if (key === 'Backspace') {
+    removeLetter();
+  } else if (key === 'Enter') {
+    submitGuess();
+  } else if (/^[a-zA-Z]$/.test(key)) {
+    addLetter(key);
+  }
 });
 
-// ========== RESULT MODAL ==========
-function showResultModal(word, didWin) {
+function showResultModal(word, didWin = true) {
+  const winModal = document.getElementById('win-modal');
+  const wordEl = document.getElementById('win-word');
+  const meaningEl = document.getElementById('win-meaning');
 
-  if (token && !isGuest) {
-    fetch("http://localhost:5000/api/game/update", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ result: didWin ? "win" : "loss" })
+  wordEl.textContent = word.toUpperCase();
+  meaningEl.textContent = "Loading meaning...";
+
+  // Change heading based on win/lose
+  const heading = winModal.querySelector("h2");
+  heading.textContent = didWin ? "🎉 You Won!" : "❌ You Lost!";
+  heading.style.color = didWin ? "green" : "red";
+
+  winModal.style.display = 'flex';
+
+  fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+    .then(res => res.json())
+    .then(data => {
+      const meaning = data[0]?.meanings[0]?.definitions[0]?.definition;
+      meaningEl.textContent = meaning || "No meaning found.";
+    })
+    .catch(err => {
+      meaningEl.textContent = "Failed to load meaning.";
     });
-  }
-
-  document.getElementById('win-modal').style.display = "flex";
-  document.getElementById('win-word').textContent = word.toUpperCase();
 }
 
-// ========== LOGOUT ==========
+
+function startNewGame() {
+  // Hide the win modal
+  const winModal = document.getElementById('win-modal');
+  winModal.style.display = 'none';
+
+  /*if (targetWord) {
+    storeUsedWord(targetWord);
+  }*/
+
+  // Reset game state
+  currentRow = 0;
+  currentCol = 0;
+  isGameReady = false;
+  targetWord = "";
+
+  // Clear the guess grid
+  guessGrid.forEach(row => {
+    Array.from(row.children).forEach(cell => {
+      cell.textContent = "";
+      cell.style.backgroundColor = "";
+      cell.classList.remove("flip");
+    });
+  });
+
+  // Reset the keyboard
+  keys.forEach(key => {
+    key.style.backgroundColor = "";
+    key.style.color = "";
+  });
+
+  // Clear hint text
+  document.getElementById('hint-text').textContent = "";
+
+  // Hide share link and input
+  document.getElementById('share-link-container').style.display = 'none';
+
+  // Clear the secret word input if any
+  inputField.value = "";
+
+  // Show mode selection again
+  document.querySelector('.mode-selector').style.display = "flex";
+  setupScreen.style.display = "none"; // ensure setup form is hidden
+}
 function logout() {
   localStorage.removeItem("token");
-  localStorage.removeItem("guest");
   window.location.href = "auth.html";
 }
+
 
