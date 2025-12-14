@@ -1,9 +1,8 @@
-
-
+// ========== INSTRUCTIONS MODAL ==========
+// ========== AUTH CHECK ==========
 const token = localStorage.getItem("token");
-const isGuest = localStorage.getItem("guest");
 
-if (!token && !isGuest) {
+if (!token) {
   window.location.href = "auth.html";
 }
 
@@ -313,34 +312,26 @@ async function submitGuess() {
 
   const result = checkGuess(guess);
 
-result.forEach((status, i) => {
-  const cell = row.children[i];
-  const letter = guess[i].toUpperCase();
+  result.forEach((status, i) => {
+    const cell = row.children[i];
+    const letter = guess[i].toUpperCase();
 
-  // ⏱ stagger each tile
-  setTimeout(() => {
-
-    // 🔥 reset + retrigger flip animation
-    cell.classList.remove("flip");
-    void cell.offsetWidth; // force reflow
-    cell.classList.add("flip");
-
-    // 🎨 apply color AFTER flip starts
     setTimeout(() => {
-      if (status === "correct") {
-        cell.style.backgroundColor = "#538d4e";
-      } else if (status === "present") {
-        cell.style.backgroundColor = "#b59f3b";
-      } else {
-        cell.style.backgroundColor = "#3a3a3c";
-      }
+      cell.classList.add("flip");
 
-      updateKeyboard(letter, status);
-    }, 300);
+      setTimeout(() => {
+        if (status === "correct") {
+          cell.style.backgroundColor = "#538d4e";
+        } else if (status === "present") {
+          cell.style.backgroundColor = "#b59f3b";
+        } else {
+          cell.style.backgroundColor = "#3a3a3c";
+        }
 
-  }, i * 300); // 👈 THIS was missing
-});
-
+        updateKeyboard(letter, status);
+      }, 300);
+    }, i * 300);
+  });
 
   setTimeout(() => {
     if (guess.toLowerCase() === targetWord && guess.trim().length === 5) {
@@ -463,6 +454,6 @@ function logout() {
   localStorage.removeItem("token");
   window.location.href = "auth.html";
 }
-
+  
 
 
