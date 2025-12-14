@@ -313,26 +313,34 @@ async function submitGuess() {
 
   const result = checkGuess(guess);
 
-  result.forEach((status, i) => {
-    const cell = row.children[i];
-    const letter = guess[i].toUpperCase();
+result.forEach((status, i) => {
+  const cell = row.children[i];
+  const letter = guess[i].toUpperCase();
 
+  // ⏱ stagger each tile
+  setTimeout(() => {
+
+    // 🔥 reset + retrigger flip animation
+    cell.classList.remove("flip");
+    void cell.offsetWidth; // force reflow
+    cell.classList.add("flip");
+
+    // 🎨 apply color AFTER flip starts
     setTimeout(() => {
-      cell.classList.add("flip");
+      if (status === "correct") {
+        cell.style.backgroundColor = "#538d4e";
+      } else if (status === "present") {
+        cell.style.backgroundColor = "#b59f3b";
+      } else {
+        cell.style.backgroundColor = "#3a3a3c";
+      }
 
-      setTimeout(() => {
-        if (status === "correct") {
-          cell.style.backgroundColor = "#538d4e";
-        } else if (status === "present") {
-          cell.style.backgroundColor = "#b59f3b";
-        } else {
-          cell.style.backgroundColor = "#3a3a3c";
-        }
+      updateKeyboard(letter, status);
+    }, 300);
 
-        updateKeyboard(letter, status);
-      }, 300);
-    }, i * 300);
-  });
+  }, i * 300); // 👈 THIS was missing
+});
+
 
   setTimeout(() => {
     if (guess.toLowerCase() === targetWord && guess.trim().length === 5) {
@@ -455,5 +463,6 @@ function logout() {
   localStorage.removeItem("token");
   window.location.href = "auth.html";
 }
+
 
 
