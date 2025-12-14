@@ -1,15 +1,4 @@
-// ========== INSTRUCTIONS MODAL ==========
-// ========== AUTH CHECK ==========
-// ========== AUTH CHECK ==========
-const token = localStorage.getItem("token");
-const isGuest = localStorage.getItem("guest");
-
-if (!token && !isGuest) {
-  window.location.href = "auth.html";
-}
-
-
-
+ // ========== INSTRUCTIONS MODAL ==========
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.querySelector("#instructions-modal");
   const closeBtn = document.querySelector("#close-modal");
@@ -414,10 +403,6 @@ function startNewGame() {
   const winModal = document.getElementById('win-modal');
   winModal.style.display = 'none';
 
-  /*if (targetWord) {
-    storeUsedWord(targetWord);
-  }*/
-
   // Reset game state
   currentRow = 0;
   currentCol = 0;
@@ -451,12 +436,7 @@ function startNewGame() {
   // Show mode selection again
   document.querySelector('.mode-selector').style.display = "flex";
   setupScreen.style.display = "none"; // ensure setup form is hidden
-}
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "auth.html";
-}
-  
+} next file
 
 
 
