@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Auth | Guess-w-Us</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <h2 id="form-title">Login</h2>
+
+        <input id="username" placeholder="Username" style="display:none">
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button id="submitBtn">Login</button>
+        <button class="guest-btn" onclick="continueAsGuest()">
+            Continue as Guest
+        </button>
+
+
+        <p id="toggleText">
+            Don’t have an account?
+            <span class="link" onclick="toggleForm()">Sign up</span>
+        </p>
+
+        <p id="msg" class="error"></p>
+    </div>
+
+    <script src="auth-ui.js"></script>
+</body>
+
+</html>
