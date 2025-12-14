@@ -436,7 +436,8 @@ function startNewGame() {
   // Show mode selection again
   document.querySelector('.mode-selector').style.display = "flex";
   setupScreen.style.display = "none"; // ensure setup form is hidden
-} next file
+} 
+
 
 
 
